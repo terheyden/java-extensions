@@ -116,6 +116,7 @@ public final class RegexBuilder {
      */
     public RegexBuilder simpleSpaces() {
 
+        // TODO: space at the begin or end indicates adding \s* at begin or end?
         // Find all spaces and see if we should use \s+ or \s* ...
 
         StringBuilder bui = new StringBuilder();
