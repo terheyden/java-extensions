@@ -2,6 +2,22 @@
 
 Utility classes for common Java stuff.
 
+## Adding to Maven
+
+You can use `java-extensions` via maven:
+
+```xml
+<dependency>
+    <groupId>com.terheyden</groupId>
+    <artifactId>java-extensions</artifactId>
+    <version>0.1.8</version>
+</dependency>
+```
+
+_TODO: Add JAR releases here for non-maven folks._
+
+## What's included
+
 ### Val
 
 Short for "value functions." Better methods than `Optional<>` to deal with nulls.
@@ -45,7 +61,7 @@ RegexBuilder.regex("I have a pet dog|cat")
     .buildPattern();
 
 // Supports transitive variables!
-// Reads so much nicer than: "Email:\s*[A-Za-z0-9._-]+@[A-Za-z0-9._-]+"
+// Reads so much nicer than: "Email:\s*(?<email>[A-Za-z0-9._-]+@[A-Za-z0-9._-]+)"
 
 RegexBuilder.regex("Email: {email}")
     .simpleSpaces()
@@ -69,7 +85,7 @@ Utils for methods and functional programming. Easier exception handling, especia
 // ignores thrown exceptions, and instead returns a default value.
 // Fantastic for lambdas.
 
-Func.supplier(x -> suppFunc(y))
+Func.supplier(suppFunc(y))
     .ignoreExceptions()
     .defaultValue(z)
     .get();
