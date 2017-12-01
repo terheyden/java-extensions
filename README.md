@@ -31,6 +31,8 @@ allEmpty(v1, v2);          //
 orIfEmpty(var, def);       // Return [var] if not empty, else return [def].
 throwIfEmpty(var, errMsg); // Throw [errMsg] if [var] is empty.
 safe(myVar);               // For avoiding nulls - returns [myVar] or a non-null empty value.
+equals(v1, v2);
+notEquals(v1, v2);
 ```
 
 Val also has a comprehensive set of empty values.
@@ -46,6 +48,16 @@ emptyObject();
 emptyFile();
 emptyPath();
 ...
+```
+
+#### Examples
+
+```java
+        // If they hit no just wait for another input.
+        if (!"YES".equals(butt.clickedButtonAction)) {
+            return EventResponse.ok(cbs.slack.finishInteractiveMsg(butt, Color.Grey, "Okay, sorry about that."));
+        }
+
 ```
 
 ### RegexBuilder

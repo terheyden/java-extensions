@@ -6,23 +6,29 @@ import java.util.function.Supplier;
  * Function and method utils.
  */
 @SuppressWarnings("unchecked")
-public class Func {
+public final class Func {
 
     private Func() {
         // Util class.
     }
 
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // OMG TOO COMPLICATED:
+
     /**
      * Build a custom {@link ThrowableRunner}.
      */
-    public static RunnerBuilder runner(ThrowableRunner func) {
+    public static RunnerBuilder quietly(ThrowableRunner func) {
         return new RunnerBuilder(func);
     }
 
     /**
      * Build a {@link ThrowableSupplier} with customizations.
      */
-    public static <T> SupplierBuilder<T> supplier(ThrowableSupplier<T> func) {
+    public static <T> SupplierBuilder<T> quietly(ThrowableSupplier<T> func) {
         return new SupplierBuilder<>(func);
     }
 

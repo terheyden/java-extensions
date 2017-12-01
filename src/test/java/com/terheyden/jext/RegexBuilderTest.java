@@ -1,6 +1,5 @@
 package com.terheyden.jext;
 
-import com.terheyden.jext.RegexBuilder;
 import org.junit.Test;
 
 import java.util.regex.Matcher;
@@ -36,18 +35,18 @@ public class RegexBuilderTest {
             .simpleSpaces()
             .buildPattern();
 
-        assertTrue(pat02.matcher("this has more spaces").find());
+        assertTrue(pat02.matcher(" this has more spaces ").find());
 
         assertTrue(pat02.matcher("\t\tthis \t has more spaces\t\t\t").find());
 
         assertFalse(pat02.matcher("thishasmorespaces").find());
 
-        Pattern pat03 = new RegexBuilder(" spaces == optional ")
-            .simpleSpaces()
-            .buildPattern();
-
-        assertTrue(pat03.matcher("  spaces   ==   optional   ").find());
-        assertTrue(pat03.matcher("spaces==optional").find());
+//        Pattern pat03 = new RegexBuilder(" spaces == optional ")
+//            .simpleSpaces()
+//            .buildPattern();
+//
+//        assertTrue(pat03.matcher("  spaces   ==   optional   ").find());
+//        assertTrue(pat03.matcher("spaces==optional").find());
     }
 
     @Test
@@ -93,6 +92,18 @@ public class RegexBuilderTest {
 
         assertTrue(pat01.matcher("--login lterheyden --email luke.terheyden@gmail.com").find());
     }
+
+//    @Test
+//    public void testBounds() {
+//
+//        Pattern pat01 = RegexBuilder
+//            .regex("log on")
+//            .bindWords()
+//            .buildPattern();
+//
+//        assertTrue(pat01.matcher("log on").find());
+//        assertFalse(pat01.matcher("flog on").find());
+//    }
 
 //    @Test
 //    public void autoCapture() {
@@ -201,5 +212,25 @@ public class RegexBuilderTest {
         assertEquals(str1a, RegexBuilder
             .regex(str1b)
             .buildString());
+    }
+
+    @Test
+    public void bug01() {
+
+        // (?:search|find)\s+(?:stack|stackid)\s*(?<stackId>[a-z0-9_-]+)
+        Pattern repoInfoPat = RegexBuilder
+            .regex("search|find stack|stackid {stackId}")
+            .ignoreCase()
+            .simpleSpaces()
+            .simpleOrs()
+            .var("{stackId}", "[a-z0-9_-]+", "stackId")
+            .buildPattern();
+
+        Matcher repoInfoMat = repoInfoPat.matcher("find stackid my-stack");
+
+        assertTrue(repoInfoMat.find());
+
+        String stackId = repoInfoMat.group("stackId");
+        assertEquals("my-stack", stackId);
     }
 }

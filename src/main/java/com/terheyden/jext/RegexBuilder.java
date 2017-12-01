@@ -43,6 +43,7 @@ public final class RegexBuilder {
     private String regex;
     private int flags;
     private boolean autoCaptureVars;
+    private boolean autoBind;
 
     // Vars are transitive, defined in order, so use a stack.
     // ArrayDeques are the fastest stack objs.
@@ -130,15 +131,11 @@ public final class RegexBuilder {
             start = spaceMat.start();
             end = spaceMat.end();
 
-            boolean isAlphaBefore = start > 0 && isAlphaNum(regex.charAt(start - 1));
-
-            boolean isAlphaAfter = end < regex.length() && isAlphaNum(regex.charAt(end));
-
             // Append before the match...
             bui.append(regex, lastStart, start);
 
             // Replace the matching strings with \s:
-            bui.append(isAlphaBefore && isAlphaAfter ? "\\s+" : "\\s*");
+            bui.append("\\s+");
 
             lastStart = end;
         }
@@ -147,6 +144,16 @@ public final class RegexBuilder {
         bui.append(regex, lastStart, regex.length());
 
         regex = bui.toString();
+        return this;
+    }
+
+    /**
+     * WORK IN PROGRESS.
+     * Automatically add bounds (\b) to words.
+     * That is, any normal string 3+ characters long.
+     */
+    private RegexBuilder bindWords() {
+        autoBind = true;
         return this;
     }
 
@@ -269,6 +276,40 @@ public final class RegexBuilder {
         regex = bui.toString();
     }
 
+    // Ironically it's easiest to use a regex to find the words to bind.
+    private static Pattern bindPat = Pattern.compile("[a-z0-9]{3,}", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * WORK IN PROGRESS.
+     */
+    private void applyBindings() {
+
+        if (!autoBind) {
+            return;
+        }
+
+        int startOff = 0;
+        Matcher bindMat = bindPat.matcher(regex);
+
+        StringBuilder bui = new StringBuilder();
+
+        while (bindMat.find()) {
+
+            // Add uninteresting stuff.
+            bui.append(regex.substring(startOff, bindMat.start()));
+
+            // Wrap and add the word.
+            bui.append("\\b");
+            bui.append(bindMat.group());
+            bui.append("\\b");
+
+            // Move beyond this word for next time.
+            startOff = bindMat.end();
+        }
+
+        regex = bui.toString();
+    }
+
     static boolean isSubstringBeforeIndex(String text, int index, String substring) {
 
         if (index <= 0) {
@@ -332,6 +373,7 @@ public final class RegexBuilder {
      */
     private void finish() {
         applyAllVars();
+        applyBindings();
     }
 
     /**
