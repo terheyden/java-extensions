@@ -4,7 +4,7 @@
 
     <groupId>com.terheyden</groupId>
     <artifactId>java-extensions</artifactId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.5</version>
     <packaging>jar</packaging>
 
     <name>java-extensions</name>
@@ -37,6 +37,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- turn off doc linting for javadoc plugin -->
+        <additionalparam>-Xdoclint:none</additionalparam>
     </properties>
 
     <build>

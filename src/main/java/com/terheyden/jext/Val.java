@@ -51,22 +51,23 @@ public class Val {
         return val == null ? useIfNull : val;
     }
 
-    public static <T> T throwIfNull(T val, String errMsg, Object... errMsgArgs) {
+    public static <T> T throwIfNull(T obj, String errMsg, Object... errMsgArgs) {
 
-        if (isNull(val)) {
-            throw new IllegalStateException(
-                isEmpty(errMsgArgs) ?
-                    errMsg :
-                    String.format(errMsg, errMsgArgs)
-            );
+        if (notNull(obj)) {
+            return obj;
         }
 
-        return val;
+        if (isNull(errMsg)) {
+            errMsg = "Unexpected null value.";
+        }
+
+        throw new IllegalStateException(
+            isEmpty(errMsgArgs) ? errMsg : String.format(errMsg, errMsgArgs)
+        );
     }
 
-    public static <T> T nsafe(T val) {
-        if (val == null) throw new NullPointerException();
-        return val;
+    public static <T> T throwIfNull(T obj) {
+        return throwIfNull(obj, null);
     }
 
     public static boolean anyNull(Object... objs) {
@@ -528,13 +529,13 @@ public class Val {
 
         return
             arg instanceof Boolean ||
-            arg instanceof Character ||
-            arg instanceof Byte ||
-            arg instanceof Short ||
-            arg instanceof Integer ||
-            arg instanceof Long ||
-            arg instanceof Float ||
-            arg instanceof Double;
+                arg instanceof Character ||
+                arg instanceof Byte ||
+                arg instanceof Short ||
+                arg instanceof Integer ||
+                arg instanceof Long ||
+                arg instanceof Float ||
+                arg instanceof Double;
     }
 
     public static boolean isTrue(Object obj) {
@@ -569,6 +570,10 @@ public class Val {
         return val;
     }
 
+    public static String throwIfEmpty(String val) {
+        return throwIfEmpty(val, "Empty value.");
+    }
+
     public static <T extends Map<?, ?>> T throwIfEmpty(T val, String errMsg, Object... errMsgArgs) {
 
         if (isEmpty(val)) {
@@ -580,6 +585,10 @@ public class Val {
         }
 
         return val;
+    }
+
+    public static <T extends Map<?, ?>> T throwIfEmpty(T val) {
+        return throwIfEmpty(val, "Empty value.");
     }
 
     public static <T extends Collection<?>> T throwIfEmpty(T val, String errMsg, Object... errMsgArgs) {
@@ -595,6 +604,10 @@ public class Val {
         return val;
     }
 
+    public static <T extends Collection<?>> T throwIfEmpty(T val) {
+        return throwIfEmpty(val, "Empty value.");
+    }
+
     public static <T> T[] throwIfEmpty(T[] val, String errMsg, Object... errMsgArgs) {
 
         if (isEmpty(val)) {
@@ -606,6 +619,10 @@ public class Val {
         }
 
         return val;
+    }
+
+    public static <T> T[] throwIfEmpty(T[] val) {
+        return throwIfEmpty(val, "Empty value.");
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -680,63 +697,86 @@ public class Val {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
-    // SAFE:
+    // NULL SAFE:
 
-    public static String safe(String val) {
+    public static String nullSafe(String val) {
         return orIfNull(val, emptyString());
     }
 
-    public static Integer safe(Integer val) {
+    public static Integer nullSafe(Integer val) {
         return orIfNull(val, emptyInt());
     }
 
-    public static Long safe(Long val) {
+    public static Long nullSafe(Long val) {
         return orIfNull(val, emptyLong());
     }
 
-    public static Float safe(Float val) {
+    public static Float nullSafe(Float val) {
         return orIfNull(val, emptyFloat());
     }
 
-    public static Double safe(Double val) {
+    public static Double nullSafe(Double val) {
         return orIfNull(val, emptyDouble());
     }
 
-    public static Boolean safe(Boolean val) {
+    public static Boolean nullSafe(Boolean val) {
         return orIfNull(val, emptyBoolean());
     }
 
-    public static <T extends Collection<?>> T safe(T val) {
+    public static <T extends Collection<?>> T nullSafe(T val) {
         return orIfNull(val, emptyCollection());
     }
 
-    public static <T extends List<?>> T safe(T val) {
+    public static <T extends List<?>> T nullSafe(T val) {
         return orIfNull(val, emptyList());
     }
 
-    public static <T extends Set<?>> T safe(T val) {
+    public static <T extends Set<?>> T nullSafe(T val) {
         return orIfNull(val, emptySet());
     }
 
-    public static <T extends Map<?, ?>> T safe(T val) {
+    public static <T extends Map<?, ?>> T nullSafe(T val) {
         return orIfNull(val, emptyMap());
     }
 
-    public static <T> T[] safe(T[] val) {
+    public static <T> T[] nullSafe(T[] val) {
         return orIfNull(val, emptyArray());
     }
 
-    public static Object safe(Object val) {
-        return orIfNull(val, emptyObject());
-    }
-
-    public static File safe(File val) {
+    public static File nullSafe(File val) {
         return orIfNull(val, emptyFile());
     }
 
-    public static Path safe(Path val) {
+    public static Path nullSafe(Path val) {
         return orIfNull(val, emptyPath());
     }
+
+    /*
+
+        public Set<Repository> findOrgRepo(String orgName, String repoNamePartial) {
+
+        List<Repository> orgRepos = repoSvc().getOrgRepositories(orgName);
+
+        if (orgRepos == null || orgRepos.isEmpty()) {
+            return null;
+        }
+
+        return orgRepos.stream()
+            .filter(r -> r.getName().contains(repoNamePartial))
+            .collect(Collectors.toSet());
+
+    }
+
+    public Set<Repository> findOrgRepo(String orgName, String repoNamePartial) {
+
+        return Val.nullSafe(repoSvc().getOrgRepositories(orgName))
+            .stream()
+            .filter(r -> r.getName().contains(repoNamePartial))
+            .collect(Collectors.toSet());
+    }
+
+
+     */
 
     ////////////////////////////////////////////////////////////////////////////////
     // EMPTY VALUES:
@@ -827,6 +867,20 @@ public class Val {
     ////////////////////////////////////////////////////////////////////////////////
     // STRINGS:
 
+    public static boolean equals(String a, String b) {
+
+        // Technically, you're equal because you're both null.
+        if (a == null && b == null) {
+            return true;
+        }
+
+        if (a == null || b == null) {
+            return false;
+        }
+
+        return a.equals(b);
+    }
+
     public static boolean equalsIgnoreCase(String a, String b) {
 
         // Technically, you're equal because you're both null.
@@ -841,8 +895,60 @@ public class Val {
         return a.equalsIgnoreCase(b);
     }
 
+    public static boolean notEquals(String a, String b) {
+        return !equals(a, b);
+    }
+
     public static boolean notEqualsIgnoreCase(String a, String b) {
         return !equalsIgnoreCase(a, b);
+    }
+
+    public static boolean equalsAny(String str, String... tests) {
+
+        // Technically, you're equal because you're both null.
+        if (str == null && (tests == null || tests.length == 0)) {
+            return true;
+        }
+
+        if (str == null || (tests == null || tests.length == 0)) {
+            return false;
+        }
+
+        for (String test : tests) {
+            if (equals(str, test)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean equalsAnyIgnoreCase(String str, String... tests) {
+
+        // Technically, you're equal because you're both null.
+        if (str == null && (tests == null || tests.length == 0)) {
+            return true;
+        }
+
+        if (str == null || (tests == null || tests.length == 0)) {
+            return false;
+        }
+
+        for (String test : tests) {
+            if (equalsIgnoreCase(str, test)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean notEqualsAny(String str, String... tests) {
+        return !equalsAny(str, tests);
+    }
+
+    public static boolean notEqualsAnyIgnoreCase(String str, String... tests) {
+        return !equalsAnyIgnoreCase(str, tests);
     }
 
     /**
@@ -853,8 +959,13 @@ public class Val {
     public static boolean contains(String text, String findStr) {
 
         // Null contains nothing.
-        if (text == null || findStr == null) {
+        if (text == null) {
             return false;
+        }
+
+        // Something contains nothing I guess.
+        if (findStr == null) {
+            return true;
         }
 
         return text.contains(findStr);
@@ -888,10 +999,10 @@ public class Val {
      * If either arg is null, returns false.
      * Better than {@link String#contains(CharSequence)} in that this version handles nulls for either arg.
      */
-    public static boolean containsAny(String text, String... findStrs) {
+    public static boolean containsAny(String text, Collection<String> findStrs) {
 
         // Null contains nothing.
-        if (text == null || findStrs == null || findStrs.length == 0) {
+        if (text == null || findStrs == null || findStrs.isEmpty()) {
             return false;
         }
 
@@ -904,8 +1015,16 @@ public class Val {
         return false;
     }
 
-    public static boolean notContainsAny(String text, String... findStrs) {
+    public static boolean containsAny(String text, String... findStrs) {
+        return containsAny(text, Arrays.asList(findStrs));
+    }
+
+    public static boolean notContainsAny(String text, Collection<String> findStrs) {
         return !containsAny(text, findStrs);
+    }
+
+    public static boolean notContainsAny(String text, String... findStrs) {
+        return notContainsAny(text, Arrays.asList(findStrs));
     }
 
     /**
@@ -938,6 +1057,109 @@ public class Val {
 
     public static boolean notContainsAnyIgnoreCase(String text, String... findStrs) {
         return !containsAnyIgnoreCase(text, findStrs);
+    }
+
+    /**
+     * Returns true if [text] ends with [findStr].
+     * If either arg is null, returns false.
+     * Better than {@link String#endsWith(CharSequence)} in that this version handles nulls for either arg.
+     */
+    public static boolean endsWith(String text, String findStr) {
+
+        // Null ends with nothing.
+        if (text == null || findStr == null) {
+            return false;
+        }
+
+        return text.endsWith(findStr);
+    }
+
+    public static boolean notEndsWith(String text, String findStr) {
+        return !endsWith(text, findStr);
+    }
+
+    /**
+     * Returns true if [text] ends with [findStr]. Ignores case.
+     * If either arg is null, returns false.
+     * Better than {@link String#endsWith(CharSequence)} in that this version handles nulls for either arg.
+     */
+    public static boolean endsWithIgnoreCase(String text, String findStr) {
+
+        // Null ends with nothing.
+        if (text == null || findStr == null) {
+            return false;
+        }
+
+        return text.toLowerCase().endsWith(findStr.toLowerCase());
+    }
+
+    public static boolean notEndsWithIgnoreCase(String text, String findStr) {
+        return !endsWithIgnoreCase(text, findStr);
+    }
+
+    /**
+     * Returns true if [text] ends with any of the [findStrs].
+     * If either arg is null, returns false.
+     * Better than {@link String#endsWith(CharSequence)} in that this version handles nulls for either arg.
+     */
+    public static boolean endsWithAny(String text, Collection<String> findStrs) {
+
+        // Null ends with nothing.
+        if (text == null || findStrs == null || findStrs.isEmpty()) {
+            return false;
+        }
+
+        for (String findStr : findStrs) {
+            if (endsWith(text, findStr)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean endsWithAny(String text, String... findStrs) {
+        return endsWithAny(text, Arrays.asList(findStrs));
+    }
+
+    public static boolean notEndsWithAny(String text, Collection<String> findStrs) {
+        return !endsWithAny(text, findStrs);
+    }
+
+    public static boolean notEndsWithAny(String text, String... findStrs) {
+        return notEndsWithAny(text, Arrays.asList(findStrs));
+    }
+
+    /**
+     * Returns true if [text] ends with any of the [findStrs]. Ignores case.
+     * If either arg is null, returns false.
+     * Better than {@link String#endsWith(CharSequence)} in that this version handles nulls for either arg.
+     */
+    public static boolean endsWithAnyIgnoreCase(String text, String... findStrs) {
+
+        // Null ends with nothing.
+        if (text == null || findStrs == null || findStrs.length == 0) {
+            return false;
+        }
+
+        String lowerText = text.toLowerCase();
+
+        for (String findStr : findStrs) {
+
+            if (findStr == null) {
+                continue;
+            }
+
+            if (endsWith(lowerText, findStr.toLowerCase())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean notEndsWithAnyIgnoreCase(String text, String... findStrs) {
+        return !endsWithAnyIgnoreCase(text, findStrs);
     }
 
     /**
@@ -1205,7 +1427,7 @@ public class Val {
 
 /*
 
-        if (Val.isEmpty(nsafe(urlVerificationReq).challenge)) {
+        if (Val.isEmpty(nnullSafe(urlVerificationReq).challenge)) {
             return Response.status(Status.BAD_REQUEST).build();
         }
 

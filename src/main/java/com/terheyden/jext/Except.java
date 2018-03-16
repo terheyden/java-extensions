@@ -12,24 +12,21 @@ public final class Except {
         // Util class.
     }
 
-    /**
-     * Wrap checked exceptions into unchecked.
-     */
-    public static <E extends Throwable> void wrap(ThrowableRunner func) throws E {
-        try {
-            func.run();
-        } catch (Throwable t) {
-            throw (E) t;
-        }
+    ////////////////////////////////////////////////////////////////////////////////
+    // THROWABLE RUNNER:
+
+    @FunctionalInterface
+    public interface ThrowableRunner {
+        void run() throws Exception;
     }
 
     /**
      * Wrap checked exceptions into unchecked.
      */
-    public static <E extends Throwable, T> T wrap(ThrowableSupplier<T> func) throws E {
+    public static <E extends Exception> void wrap(ThrowableRunner func) throws E {
         try {
-            return func.get();
-        } catch (Throwable t) {
+            func.run();
+        } catch (Exception t) {
             throw (E) t;
         }
     }
@@ -40,8 +37,30 @@ public final class Except {
     public static void ignore(ThrowableRunner func) {
         try {
             func.run();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             // Ignore.
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // THROWABLE SUPPLIER:
+
+    /**
+     * A {@link Supplier} that can throw an exception.
+     */
+    @FunctionalInterface
+    public interface ThrowableSupplier<T> {
+        T get() throws Exception;
+    }
+
+    /**
+     * Wrap checked exceptions into unchecked.
+     */
+    public static <E extends Exception, T> T wrap(ThrowableSupplier<T> func) throws E {
+        try {
+            return func.get();
+        } catch (Exception t) {
+            throw (E) t;
         }
     }
 
@@ -51,22 +70,28 @@ public final class Except {
     public static <T> T ignore(ThrowableSupplier<T> func) {
         try {
             return func.get();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             // Ignore.
             return null;
         }
     }
 
-    @FunctionalInterface
-    public interface ThrowableRunner {
-        void run() throws Throwable;
+    /**
+     * Ignore all exceptions thrown, and continue. Return default value, if an exception occurs.
+     */
+    public static <T> T ignoreWithDefault(ThrowableSupplier<T> func, T defaultVal) {
+        try {
+            return func.get();
+        } catch (Exception t) {
+            return defaultVal;
+        }
     }
 
-    /**
-     * A {@link Supplier} that can throw an exception.
-     */
+    ////////////////////////////////////////////////////////////////////////////////
+    // THROWABLE FUNCTION:
+
     @FunctionalInterface
-    public interface ThrowableSupplier<T> {
-        T get() throws Throwable;
+    public interface ThrowableFunction<T, R> {
+        R apply(T val) throws Exception;
     }
 }

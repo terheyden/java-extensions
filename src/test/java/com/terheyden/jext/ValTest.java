@@ -62,7 +62,7 @@ public class ValTest {
         // Nulls are false.
         assertFalse(Val.contains(null, null));
         assertFalse(Val.contains(null, "yes"));
-        assertFalse(Val.contains("yes", null));
+        assertTrue(Val.contains("yes", null));
 
         // Simple cases.
         assertTrue(Val.contains("hello", "hello"));
@@ -78,6 +78,42 @@ public class ValTest {
 
         assertTrue(Val.containsAnyIgnoreCase("hello", "HELL", "MOO"));
         assertFalse(Val.containsAllIgnoreCase("hello", "HELL", "MOO"));
+
+        assertTrue(Val.notContains(null, null));
+        assertTrue(Val.notContains("message", "mee"));
+        assertFalse(Val.notContains("message", "me"));
+        assertFalse(Val.notContains("message", ""));
+        assertFalse(Val.notContains("message", null));
+
+        String NULL = null;
+        assertTrue(Val.notContainsAny(NULL, NULL));
+        assertTrue(Val.notContainsAny("message", "mee", "ma"));
+        assertTrue(Val.notContainsAny("message", "ma"));
+        assertFalse(Val.notContainsAny("message", ""));
+        assertFalse(Val.notContainsAny("message", NULL));
+    }
+
+    @Test
+    public void testEquals() {
+
+        // Nulls are true - null == null.
+        assertTrue(Val.equals(null, null));
+        assertFalse(Val.equals(null, "yes"));
+        assertFalse(Val.equals("yes", null));
+
+        // Simple cases.
+        assertTrue(Val.equals("hello", "hello"));
+        assertFalse(Val.equals("hello", "hell"));
+        assertFalse(Val.equals("hello", "hEllo"));
+        assertFalse(Val.equals("hello", "hellow"));
+        assertFalse(Val.equals("hello", "yello"));
+        assertFalse(Val.equals("hello", "HELLO"));
+
+        assertTrue(Val.equalsIgnoreCase("hello", "HELLO"));
+        assertTrue(Val.equalsAnyIgnoreCase("hello", "HELLO"));
+        assertTrue(Val.equalsAnyIgnoreCase("hello", "HELL", "HELLO"));
+
+        assertTrue(Val.equalsAnyIgnoreCase("hello", "HELL", "MOO", "HELLO"));
     }
 
     private final String goodStr = "good";
@@ -188,14 +224,27 @@ public class ValTest {
     @Test
     public void testDebug() {
 
-        Set<Object> set = new SetBuilder<Object>()
-            .add(new ListBuilder<Object>().add("list1").add("list2").toArrayList())
+        Set<Object> set = new SetBuilder<>()
+            .add(new ListBuilder<>().add("list1").add("list2").toArrayList())
             .add(new ForkJoinPool())
             .add(3)
             .add(true)
             .toHashSet();
 
         System.out.println(Val.toDebugStr(set));
-    }
 
+        List<String> strList = ListBuilder.newArrayList("Mika", "Cora", "Tashi");
+        System.out.println(Val.toDebugStr(strList));
+
+        Map<Integer, TestUser> map = MapBuilder.newMap(300, new TestUser("Cora", 6))
+            .put(100, new TestUser("Mika", 12))
+            .put(200, new TestUser("Tashi", 11))
+            .buildHashMap();
+
+        System.out.println(Val.toDebugStr(map));
+
+        String[] cats = { "Mika", "Tashi", "Cora" };
+
+        System.out.println(Val.toDebugStr(cats));
+    }
 }

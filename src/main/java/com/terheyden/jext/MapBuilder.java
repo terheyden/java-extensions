@@ -12,8 +12,8 @@ public class MapBuilder<K, V> {
     // Also our default / most used built type.
     private final HashMap<K, V> entries = new HashMap<>();
 
-    public static <K, V> MapBuilder<K, V> newMap() {
-        return new MapBuilder<>();
+    public static <K, V> MapBuilder<K, V> newMap(K firstKey, V firstVal) {
+        return new MapBuilder<K, V>().put(firstKey, firstVal);
     }
 
     /**

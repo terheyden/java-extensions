@@ -93,17 +93,57 @@ public class RegexBuilderTest {
         assertTrue(pat01.matcher("--login lterheyden --email luke.terheyden@gmail.com").find());
     }
 
-//    @Test
-//    public void testBounds() {
-//
-//        Pattern pat01 = RegexBuilder
-//            .regex("log on")
-//            .bindWords()
-//            .buildPattern();
-//
-//        assertTrue(pat01.matcher("log on").find());
-//        assertFalse(pat01.matcher("flog on").find());
-//    }
+    @Test
+    public void testBounds() {
+
+        Pattern pat01 = RegexBuilder
+            .regex("_log on_")
+            .wordBoundary("_")
+            .buildPattern();
+
+        assertTrue(pat01.matcher("log on").find());
+        assertFalse(pat01.matcher("flog on").find());
+
+        Pattern pat02 = RegexBuilder
+            .regex("_nuke|wipe|clear|clean|erase_.*_s3_")
+            .ignoreCase()
+            .simpleOrs()
+            .simpleSpaces()
+            .wordBoundary("_")
+            .buildPattern();
+
+        assertTrue(pat02.matcher("nuke s3").find());
+    }
+
+    @Test
+    public void testWildcards() {
+
+        Pattern simplePat = RegexBuilder
+            .regex("The * Of The *")
+            .ignoreCase()
+            .wildcards()
+            .buildPattern();
+
+        Matcher simpleMat = simplePat.matcher(" the name of the wind");
+
+        assertTrue(simpleMat.find());
+        assertEquals("name", simpleMat.group(1));
+        assertEquals("wind", simpleMat.group(2));
+
+        Pattern questionPat = RegexBuilder
+            .regex("whats?   up    peoples?")
+            .wildcards()
+            .simpleSpaces()
+            .buildPattern();
+
+        Matcher questionMat = questionPat.matcher("what up people");
+        assertTrue(questionMat.find());
+
+        questionMat = questionPat.matcher("what up peoples");
+        assertTrue(questionMat.find());
+
+
+    }
 
 //    @Test
 //    public void autoCapture() {

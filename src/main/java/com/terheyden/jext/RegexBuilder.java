@@ -36,14 +36,14 @@ import java.util.regex.Pattern;
  */
 public final class RegexBuilder {
 
+    // Removed _- because it made word boundaries go inside parens.
     // [A-Za-z0-9_-]+\|[A-Za-z0-9_-]+(?:\|[A-Za-z0-9_-]+)*
-    private static final String orRegex = "[A-Za-z0-9_-]+\\|[A-Za-z0-9_-]+(?:\\|[A-Za-z0-9_-]+)*";
+    private static final String orRegex = "[A-Za-z0-9]+\\|[A-Za-z0-9]+(?:\\|[A-Za-z0-9]+)*";
     private static final Pattern orPat = Pattern.compile(orRegex);
 
     private String regex;
     private int flags;
     private boolean autoCaptureVars;
-    private boolean autoBind;
 
     // Vars are transitive, defined in order, so use a stack.
     // ArrayDeques are the fastest stack objs.
@@ -147,16 +147,6 @@ public final class RegexBuilder {
         return this;
     }
 
-    /**
-     * WORK IN PROGRESS.
-     * Automatically add bounds (\b) to words.
-     * That is, any normal string 3+ characters long.
-     */
-    private RegexBuilder bindWords() {
-        autoBind = true;
-        return this;
-    }
-
     private boolean isAlphaNum(char c) {
         return
             c >= '0' && c <= '9' ||
@@ -192,6 +182,14 @@ public final class RegexBuilder {
         bui.append(str);
 
         regex = bui.toString();
+        return this;
+    }
+
+    /**
+     * Instead of \\bword\\b you can use _word_.wordBoundary("_")
+     */
+    public RegexBuilder wordBoundary(String bindChar) {
+        regex = regex.replaceAll(bindChar, "\\\\b");
         return this;
     }
 
@@ -279,37 +277,6 @@ public final class RegexBuilder {
     // Ironically it's easiest to use a regex to find the words to bind.
     private static Pattern bindPat = Pattern.compile("[a-z0-9]{3,}", Pattern.CASE_INSENSITIVE);
 
-    /**
-     * WORK IN PROGRESS.
-     */
-    private void applyBindings() {
-
-        if (!autoBind) {
-            return;
-        }
-
-        int startOff = 0;
-        Matcher bindMat = bindPat.matcher(regex);
-
-        StringBuilder bui = new StringBuilder();
-
-        while (bindMat.find()) {
-
-            // Add uninteresting stuff.
-            bui.append(regex.substring(startOff, bindMat.start()));
-
-            // Wrap and add the word.
-            bui.append("\\b");
-            bui.append(bindMat.group());
-            bui.append("\\b");
-
-            // Move beyond this word for next time.
-            startOff = bindMat.end();
-        }
-
-        regex = bui.toString();
-    }
-
     static boolean isSubstringBeforeIndex(String text, int index, String substring) {
 
         if (index <= 0) {
@@ -373,7 +340,6 @@ public final class RegexBuilder {
      */
     private void finish() {
         applyAllVars();
-        applyBindings();
     }
 
     /**
@@ -410,5 +376,16 @@ public final class RegexBuilder {
      */
     public boolean matches(String text) {
         return buildMatcher(text).find();
+    }
+
+    /**
+     * Change the regex pattern to support wildcard syntax.
+     * Supports * and ?.
+     * Asterisks are automatically grouped.
+     */
+    public RegexBuilder wildcards() {
+
+        regex = regex.replaceAll("\\*", "(.*)");
+        return this;
     }
 }

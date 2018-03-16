@@ -10,7 +10,7 @@ You can use `java-extensions` via maven:
 <dependency>
     <groupId>com.terheyden</groupId>
     <artifactId>java-extensions</artifactId>
-    <version>0.1.8</version>
+    <version>0.2.5</version>
 </dependency>
 ```
 
@@ -57,6 +57,45 @@ emptyPath();
         if (!"YES".equals(butt.clickedButtonAction)) {
             return EventResponse.ok(cbs.slack.finishInteractiveMsg(butt, Color.Grey, "Okay, sorry about that."));
         }
+
+```
+
+### Result
+
+Represents the result of a method call, or a work item.
+Can be used instead of nulls or `Optional<>`.
+
+```java
+
+    // Examples:
+
+    // BEFORE:
+
+    User u = loadUser(100);
+    if (u == null) {
+        throw new Exception("User could not be found.");
+    }
+
+    // AFTER:
+
+    Result<User> res = loadUser(100);
+    return res.getValueOrThrow("User could not be found.");
+    
+    // Or just:
+    return loadUser(100).getValueOrThrow("User could not be found.");
+
+    // BEFORE:
+    
+    User u = loadUser(100);
+    if (u != null) {
+        users.add(u);
+    }
+    
+    // AFTER:
+
+    // Supports streams - more readable than Optional<>:
+    loadUser(100)
+        .ifHasValue().forEach(users::add);
 
 ```
 
